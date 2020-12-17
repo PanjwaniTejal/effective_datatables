@@ -36,34 +36,33 @@ initializeDataTables = ->
               header: (str) -> $("<div>#{str}</div>").children('.search-label').first().text()
             columns: buttons_export_columns
           customize: (csv) ->
+            # Get Table header which is visisble true
+            table_headers = $('table').children('thead').children('tr').children('th').children('.search-label')
+            header_text = []
+            for i in [0..table_headers.length-1]
+              header_text.push(table_headers[i].innerHTML)
+
             split_csv = csv.split("\n");
-            row_array = [] # Get rows in array form
+            row_array = []
             $.each split_csv, (tag) ->
-              # TAG is a index of split_csv
+              # TAG is a index of row data
               row_array.push(split_csv[tag].split(/","/))
 
-            header_data = row_array[0] # first array element is header
-            row_data = row_array.slice(1) # After that all element is row
+            header_data = row_array[0]
             hidden_col_ids = []
 
-            first_row = row_data[0] # get first row of array
+            header_data[0] = header_data[0].toString().replace('"', '') # getting first element like "Text. So remove " from element
+            header_data[header_data.length-1] = header_data[header_data.length-1].toString().replace('"', '') # getting first element like Text"
 
-            # /^...$/ -> Match "..." string from each element
-            # /^"...$/ -> We get each row's array's first element like ""xyz" this. 
-            # /^..."$/ -> We get each row's array's last element like "xyz"" this.
-
-            # get ids in which data is not present. And it shows with "..."
-            for i in [0..first_row.length-1]
-              if (/^...$/.test(first_row[i]) || /^"...$/.test(first_row[i]) || /^..."$/.test(first_row[i]))
+            for i in [0..header_data.length-1]
+              if !(header_data[i] in header_text)
                 hidden_col_ids.push(i)
-
-            # Remove ids from all rows so make it reverse and romve that index data from rows of array
+            
             hidden_col_ids = hidden_col_ids.reverse()
             for tag in [0..row_array.length-1]
               $.each hidden_col_ids, (id) ->
                 row_array[tag].splice(hidden_col_ids[id],1)
 
-            # Join all rows with \n
             csv = row_array.join("\n");
             return csv;
         },
