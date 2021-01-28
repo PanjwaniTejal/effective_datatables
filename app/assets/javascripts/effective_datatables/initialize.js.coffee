@@ -42,8 +42,9 @@ initializeDataTables = ->
             for i in [0..table_headers.length-1]
               header_text.push(table_headers[i].innerHTML)
 
-            split_csv = csv.split("\n");
+            split_csv = csv.split(/"\n"/);
             row_array = []
+            final_row = []
             $.each split_csv, (tag) ->
               # TAG is a index of row data
               row_array.push(split_csv[tag].split(/","/))
@@ -63,7 +64,19 @@ initializeDataTables = ->
               $.each hidden_col_ids, (id) ->
                 row_array[tag].splice(hidden_col_ids[id],1)
 
-            csv = row_array.join("\n");
+            # row_array[0][0] = '"' + row_array[0][0]
+            # row_array[0][row_array[0].length-1] = row_array[0][row_array[0].length-1] + '"'
+            for tag in [0..row_array.length-1]
+              # row_array[tag][0] = row_array[tag][0].toString().replace('"', '')
+              # row_array[tag][row_array[tag].length - 1] = row_array[tag][row_array[tag].length - 1].toString().replace('"', '')
+              final_str =  '"' + row_array[tag].join(/","/)
+              final_str = final_str + '"' if final_str[final_str.length-1] != '"'
+              final_row.push(final_str)
+            
+            for i in [0..final_row.length-1]
+              final_row[i] = final_row[i].replaceAll("/", '')
+            
+            csv = final_row.join("\n");
             return csv;
         },
         {
